@@ -55,11 +55,19 @@ class TFmRna : public TForm
 	TShape *Shape20;
 	TLabel *Label1;
 	TLabel *Label2;
+	TPanel *Panel1;
+	TComboBox *ComboBox2;
+	TLabel *lblCamadaIntermediaria;
+	TLabel *Label3;
+	TEdit *txtAprendizado;
+	TFastLineSeries *Series3;
 		void __fastcall Button1Click(TObject *Sender);
 		void __fastcall Button2Click(TObject *Sender);
         void __fastcall AtualizaGrafico();
 	void __fastcall FormCreate(TObject *Sender);
 	void __fastcall ListBox1Click(TObject *Sender);
+	void __fastcall ComboBox2Change(TObject *Sender);
+	void __fastcall txtAprendizadoChange(TObject *Sender);
 
 
 	private:	// User declarations

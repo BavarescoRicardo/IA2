@@ -5,6 +5,8 @@
 
 #include "URna.h"
 #include "NeuralNetwork.h"
+#include<iostream>
+#include<string>
 
 //---------------------------------------------------------------------------
 
@@ -14,17 +16,17 @@
 TFmRna *FmRna;
 Thread *MyThread;
 NeuralNetwork *net;
+
 //---------------------------------------------------------------------------
 
 unsigned long contador = 0, epocas = 0;
-
 int a = 0, b = 0, i = 0, j = 0, k = 0, n = 0, padroes = 0, fim = 0, funcao = 0;
-float rnd = 0, soma = 0, taxa_aprendizado = 0, MOMENTUM = 0, precisao_da_randomizacao = 0;
-float ERRO = 0, erro_medio_quadratico = 0, erro_quadratico = 0, threshold = 0;
+float rnd = 0, soma = 0, taxa_aprendizado = 0, MOMENTUM = 0.1, precisao_da_randomizacao = 0;
+float ERRO = 0, erro_medio_quadratico = 0, erro_medio_quadraticoAnterior = 0, erro_quadratico = 0, threshold = 0;
 float curva = 0;
 
 const int cx = 100;         // Camada de entrada.
-const int c1 = 15;          // Camada Intermediária.
+const int c1 = 5;          // Camada Intermediária.
 const int c2 = 5;          // Camada de Saída.
 
 float w1[cx*c1]  = {0};     // cx*c1
@@ -39,8 +41,10 @@ float saidas_real[cx][c2] = {0}, saidas_bin[cx][c2] = {0};
 int saidas_formatadas_c1[c1] = {0};
 int saidas_formatadas_c2[c2] = {0};
 
+
+
  // Padrões de Entrada da Rede.
-float p[10][cx] =
+float p[10][100] =
 {
 //sinal 1 Hz
 0.000000,0.062791,0.125333,0.187381,0.248690,0.309017,0.368125,0.425779,0.481754,0.535827,0.587785,0.637424,0.684547,0.728969,0.770513,0.809017,0.844328,0.876307,0.904827,0.929777,0.951057,0.968583,0.982287,0.992115,0.998027,1.000000,0.998027,0.992115,0.982287,0.968583,0.951057,0.929777,0.904827,0.876307,0.844328,0.809017,0.770513,0.728969,0.684547,0.637424,0.587786,0.535827,0.481754,0.425780,0.368125,0.309018,0.248691,0.187382,0.125334,0.062792,0.000001,-0.062789,-0.125332,-0.187380,-0.248689,-0.309016,-0.368123,-0.425778,-0.481752,-0.535825,-0.587784,-0.637423,-0.684546,-0.728967,-0.770512,-0.809016,-0.844327,-0.876306,-0.904826,-0.929776,-0.951056,-0.968583,-0.982287,-0.992114,-0.998027,-1.000000,-0.998027,-0.992115,-0.982288,-0.968584,-0.951057,-0.929778,-0.904828,-0.876308,-0.844330,-0.809019,-0.770515,-0.728971,-0.684549,-0.637427,-0.587788,-0.535830,-0.481757,-0.425783,-0.368128,-0.309020,-0.248693,-0.187385,-0.125337,-0.062794,
@@ -95,6 +99,20 @@ float d[10][c2] =
 };
 
 
+// ************ codigo que fiz
+float sinalGerado[10][10];
+void gerarSinal()
+{
+	for (int j = 0; j < 10; j++)
+	{
+		for (int i = 0; i < 10; i++)
+		{
+			// Sinal 1 - 32
+			p[j][i] = (rand() % 1 + 32)/10;
+		}
+	}
+
+}
 
 
 //---------------------------------------------------------------------------
@@ -154,6 +172,10 @@ void __fastcall TFmRna::Button1Click(TObject *Sender)
 
 void __fastcall TFmRna::Button2Click(TObject *Sender)
 {
+	// zerar valores
+	erro_medio_quadraticoAnterior = 0;
+	erro_medio_quadratico = 0;
+
 	// Verificação da instância da thread de atualização do gráfico.
 	if (MyThread != NULL)
 	{
@@ -164,6 +186,8 @@ void __fastcall TFmRna::Button2Click(TObject *Sender)
 		MyThread = NULL;
 
 		FmRna->Memo1->Lines->Add("finalizou a thread e deletou a instância.");
+
+
 	}
 }
 
@@ -183,7 +207,7 @@ void __fastcall Thread::Execute()
 {
 
     /* initialize random weights: */
-    srand (time(NULL));
+	srand (time(NULL));
 
 	padroes = 10;               	// Número de padrões a treinar.
 	funcao = 1;                 	// Função Logística(0).
@@ -313,6 +337,7 @@ void __fastcall Thread::Execute()
 //       Inicio do treinamento da rede (propagação dos padrões pela rede)      //
 //-----------------------------------------------------------------------------//
 
+	gerarSinal();
 
 	while(contador != epocas && !MyThread->Terminated)
 	{
@@ -473,14 +498,24 @@ void __fastcall Thread::Execute()
 
 void __fastcall TFmRna::AtualizaGrafico()
 {
+	if ((erro_medio_quadraticoAnterior != 0) && (erro_medio_quadraticoAnterior <= erro_medio_quadratico))
+	{
+		MyThread->Terminate();
+		FmRna->Memo1->Lines->Add("Curva do erro aumentou! parar");
+		return;
+	}
 	// Plota as amostras no gráfico.
 	FmRna->Memo1->Lines->Add(FloatToStrF(erro_medio_quadratico,ffFixed,10,6));
 	FmRna->Chart1->Series[0]->AddY(erro_medio_quadratico);
 
+	// plota saida      saidas_formatadas_c2
+	FmRna->Memo1->Lines->Add(FloatToStrF(erro_medio_quadraticoAnterior,ffFixed,10,6));
+	FmRna->Chart1->Series[1]->AddY(erro_medio_quadraticoAnterior);
+    erro_medio_quadraticoAnterior = erro_medio_quadratico;
+
 }
 
 //---------------------------------------------------------------------------
-
 
 void __fastcall TFmRna::ListBox1Click(TObject *Sender)
 {
@@ -666,4 +701,22 @@ void __fastcall TFmRna::ListBox1Click(TObject *Sender)
 //---------------------------------------------------------------------------
 
 
+
+void __fastcall TFmRna::ComboBox2Change(TObject *Sender)
+{
+  String comboString = ComboBox2->Text;
+
+  comboString >> c1;
+  printf("%d",c1);
+}
+//---------------------------------------------------------------------------
+void __fastcall TFmRna::txtAprendizadoChange(TObject *Sender)
+{
+    	String textoString = txtAprendizado->Text;
+
+	textoString >> taxa_aprendizado;
+	printf("%f\n",taxa_aprendizado);
+
+}
+//---------------------------------------------------------------------------
 

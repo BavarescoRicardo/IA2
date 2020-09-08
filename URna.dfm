@@ -2,7 +2,7 @@ object FmRna: TFmRna
   Left = 0
   Top = 0
   Caption = 'Redes Neurais Artificiais'
-  ClientHeight = 540
+  ClientHeight = 635
   ClientWidth = 1143
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -19,7 +19,7 @@ object FmRna: TFmRna
     Top = 8
     Width = 1128
     Height = 509
-    ActivePage = TabSheet2
+    ActivePage = TabSheet1
     MultiLine = True
     TabOrder = 0
     object TabSheet1: TTabSheet
@@ -43,6 +43,13 @@ object FmRna: TFmRna
           ValueFormat = '#.##0,00###'
           LinePen.Color = 10708548
           LinePen.Width = 2
+          XValues.Name = 'X'
+          XValues.Order = loAscending
+          YValues.Name = 'Y'
+          YValues.Order = loNone
+        end
+        object Series3: TFastLineSeries
+          LinePen.Color = 3513587
           XValues.Name = 'X'
           XValues.Order = loAscending
           YValues.Name = 'Y'
@@ -284,6 +291,57 @@ object FmRna: TFmRna
           YValues.Order = loNone
         end
       end
+    end
+  end
+  object Panel1: TPanel
+    Left = 8
+    Top = 523
+    Width = 1113
+    Height = 104
+    Caption = ' '
+    Color = clInactiveCaption
+    ParentBackground = False
+    TabOrder = 1
+    object lblCamadaIntermediaria: TLabel
+      Left = 8
+      Top = 8
+      Width = 120
+      Height = 13
+      Caption = 'Camadas Intermediarias:'
+      Color = clCream
+      ParentColor = False
+    end
+    object Label3: TLabel
+      Left = 184
+      Top = 8
+      Width = 101
+      Height = 13
+      Caption = 'Taxa de aprendizado'
+    end
+    object ComboBox2: TComboBox
+      Left = 8
+      Top = 40
+      Width = 153
+      Height = 21
+      TabOrder = 0
+      Text = 'Selecione:'
+      OnChange = ComboBox2Change
+      Items.Strings = (
+        '5'
+        '10'
+        '15'
+        '20'
+        '25'
+        '30')
+    end
+    object txtAprendizado: TEdit
+      Left = 176
+      Top = 40
+      Width = 121
+      Height = 21
+      TabOrder = 1
+      Text = '0'
+      OnChange = txtAprendizadoChange
     end
   end
 end
